@@ -1,0 +1,15 @@
+{
+  "name": "peg",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "genetic-nodejs-multithread": "^0.3.7",
+    "geneticalgorithm": "^1.0.2"
+  }
+}

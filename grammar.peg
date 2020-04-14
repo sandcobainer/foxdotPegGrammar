@@ -1,0 +1,32 @@
+
+grammar foxdot
+start <- player / pattributes / clock / func / scale / root
+func <-  string "(" pname "," pname ("," param)* ")" %make_fparams
+clock <- "Clock.bpm" "=" number %make_bpm
+root <- "Root.default" "=" string "#" %make_root
+scale <- "Scale.default" "=" string %make_scale
+
+
+player <- pname ">>" ptype "("  params ")"  %make_player 
+params <- param ("," param)* %make_param
+
+param <- pattribute "=" array %make_pattribute / pattribute "=" element %make_pattribute
+
+pattributes <- pname "." pattribute "=" array / pname "." pattribute "=" element
+pname <- string number %make_pname
+ptype <- string
+
+array     <-  "[" element ("," element)* "]" %make_list
+pattribute <- string  
+
+
+        
+element   <-  number / string
+
+string    <-  [a-zA-Z]+ %make_string
+number    <-  "-"? ("0" / [1-9] [0-9]*) ("." [0-9]+)? (("e" / "E") ("+" / "-" / "") [0-9]+)? %make_number
+boolean_  <-  "True" / "False"
+null_     <-  "null"
+__        <-  [\s]*
+
+
