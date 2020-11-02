@@ -2,9 +2,20 @@ const parser = require('./grammar')
 
 // this is a naive parser with no editor exception handling like spaces,
 // all params should be in the format degree=[], dur=[] etc.
-let code = `b1>>bass(degree=[0,6,7],dur=4,delay=[3,5,6])`
+let defaultParams = { source : '', dest: '',
+     options : {
+       stepSize : 1,
+       lifetime : 1,
+       interpolate: 'none',
+       population: 5,
+       skipGenerations: 100,
+       evolutions:3000,
+       mutationAmount : 0.3,
+       crossoverAmount: 0.3
+     }
+}
 
-var actions = {
+let actions = {
   make_player: function(input, start, end, elements) {
     let player = {}
     player['pname'] = elements[0]
@@ -16,14 +27,10 @@ var actions = {
     return elements[0].concat(elements[1])
   },
   make_param: function(input, start, end, elements) {
-    let params = [elements[0]];
+    let params = []
+    params = [elements[0]];
     elements[1].elements.forEach(function(el) {params.push(el.param)})
-    // elements[2].forEach(function(el) { params.push(el.element) });
-
     return params
-  },
-  make_note: function(input, start, end, elements) {
-    return elements
   },
 
   make_pattribute: function(input, start, end, elements) {
@@ -32,48 +39,95 @@ var actions = {
     return pat
   },
 
+  make_nonattribute: function(input, start, end, elements) {
+    let nat = {}
+    if(elements[0].text!='')
+      nat['array'] = elements[0].elements[0]
+    else if (elements[1].text!='')
+      nat['element'] = elements[1].elements[0]
+    else if (elements[2].text!='')
+      nat['pattern'] = elements[2].elements[0]
+    else if (elements[3].text!='')
+      nat['file'] = elements[3].elements[0]
+    return nat
+  },
+
   make_list: function(input, start, end, elements) {
     let list = [elements[1]];
     elements[2].forEach(function(el) { list.push(el.element) });
     return list;
   },
-  
+
   make_string: function(input, start, end, elements) {
     let str = ''
     elements.forEach(function(el){str = str.concat(el.text) })
     return str;
   },
+  make_special: function(input, start, end, elements) {
+    let str = ''
+    elements.forEach(function(el){str = str.concat(el.text) })
+    return str;
+  },
+
+  make_pattern: function(input, start, end, elements) {
+    return elements[1].text
+  },
+  make_file: function(input, start, end, elements) {
+    return elements[1].text + '.' + elements[3]
+  },
+
+  make_fraction: function(input, start, end, elements){
+    return elements[0] / elements[2]
+  },
   make_number: function(input, start, end, elements) {
     return parseFloat(input.substring(start, end), 10);
   },
-
   make_bpm: function(input, start, end, elements) {
     return { 'bpm': elements[2] }
   },
+  make_meter: function(input, start, end, elements) {
+    return { 'num_beats': elements[2], 'beat_length': elements[4]  }
+  },
   make_root: function(input, start, end, elements) {
-    return { 'root': elements[2].concat(elements[3].text)}
+    return { 'root': elements[3]}
   },
   make_scale: function(input, start, end, elements) {
-    return { 'scale': elements[2] }
+    return { 'scale': elements[3] }
   },
   make_fparams: function(input, start, end, elements) {
-    let fparams = {}
-    fparams['function'] = elements[0]
-    fparams['source'] = elements[2];
-    fparams['dest'] = elements[4];
+    let params = defaultParams;
+    params['fparams'] = elements[0]
+    params['source'] = elements[2];
+    params['dest'] = elements[3].pname;
     let options = []
-    elements[5].elements.forEach(function(el) {
+    elements[4].elements.forEach(function(el) {
       options.push(el.param)
     })
-    fparams['options'] = options;
-    return fparams;
+    options = convertToObj(options);
+    Object.keys(options).forEach((o) => {
+      params.options[o] = options[o];
+    });
+    return params;
   }
 };
+
+function convertToObj(options) {
+  let obj = {}, k
+  options.forEach((o) => {
+    if (Array.isArray(o) || typeof(o) == 'string')
+      obj['nonparam'] = o
+    else {
+      k = Object.keys(o)[0]
+      obj[k] = o[k]
+    }
+    if (typeof obj[k]!= 'object') {
+      obj[k] = [obj[k]]
+    }
+  });
+  return obj
+}
 
 
 module.exports = function parse (code) {
   return results = parser.parse(code, {actions: actions});
-} 
-
-let results = parser.parse(code, {actions: actions});
-console.log(results)
+}

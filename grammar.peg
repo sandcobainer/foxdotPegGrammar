@@ -1,29 +1,29 @@
 
 grammar foxdot
-start <- player / pattributes / clock / func / scale / root
-func <-  string "(" pname "," pname ("," param)* ")" %make_fparams
-clock <- "Clock.bpm" "=" number %make_bpm
+start <- player / bpm / meter / func / scale / root
+func <-  string "(" pname ("," pname)?  ("," param)* ")" %make_fparams
+bpm <- "Clock.bpm" "=" number %make_bpm
+meter <- "Clock.meter" "=(" number "," number ")" %make_meter
 root <- "Root.default" "=" string "#" %make_root
 scale <- "Scale.default" "=" string %make_scale
 
-
 player <- pname ">>" ptype "("  params ")"  %make_player 
-params <- param ("," param)* %make_param
+params <- param ("," param)* %make_param 
 
-param <- pattribute "=" array %make_pattribute / pattribute "=" element %make_pattribute
-
-pattributes <- pname "." pattribute "=" array / pname "." pattribute "=" element
+param <- pattribute "=" array %make_pattribute / pattribute "=" element %make_pattribute / (array* element* pattern* file*) %make_nonattribute
 pname <- string number %make_pname
 ptype <- string
 
-array     <-  "[" element ("," element)* "]" %make_list
+array      <-  "[" element ("," element)* "]" %make_list
 pattribute <- string  
-
-
         
-element   <-  number / string
+element   <-  fraction / number / string
+pattern   <- "'" (string special)+  "'" %make_pattern
+file      <- "'" (string* number*) . string "'" %make_file
+string    <-  [a-zA-Z]+ %make_string 
+special  <-  [~!@#$%^&*-=+:\/\\1234\\\|]+  %make_special 
+fraction  <-  number "/" number %make_fraction 
 
-string    <-  [a-zA-Z]+ %make_string
 number    <-  "-"? ("0" / [1-9] [0-9]*) ("." [0-9]+)? (("e" / "E") ("+" / "-" / "") [0-9]+)? %make_number
 boolean_  <-  "True" / "False"
 null_     <-  "null"
