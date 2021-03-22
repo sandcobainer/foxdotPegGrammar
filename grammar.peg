@@ -18,10 +18,10 @@ array      <-  "[" element ("," element)* "]" %make_list
 pattribute <- string  
         
 element   <-  fraction / number / string
-pattern   <- "'" (string special)+  "'" %make_pattern
+pattern   <- "'" special* "'" %make_pattern
 file      <- "'" (string* number*) . string "'" %make_file
 string    <-  [a-zA-Z]+ %make_string 
-special  <-  [~!@#$%^&*-=+:\/\\1234\\\|]+  %make_special 
+special  <-  [a-zA-Z~!@#$%^&*-=+:\/\\1234\\\|]+  %make_special 
 fraction  <-  number "/" number %make_fraction 
 
 number    <-  "-"? ("0" / [1-9] [0-9]*) ("." [0-9]+)? (("e" / "E") ("+" / "-" / "") [0-9]+)? %make_number
