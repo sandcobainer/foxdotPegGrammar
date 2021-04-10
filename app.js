@@ -5,7 +5,7 @@ const evolver_1 = require("./ga")
 // j2>>pluck(degree=[1,0,6,7], chop=0.8, tremolo=0.9)
 
 
-let code = `j1>>play('@axe3-o-',chop=0.4, tremolo=0.2)
+let code = `j1>>play('@axe3-o-x-',chop=0.4, tremolo=0.2)
 evolve(j1, stepSize=0.1, evolutions=100, skipGenerations=25, mutationAmount=0.01)`
 
 let lines =code.split('\n');
